@@ -1,4 +1,5 @@
-"""Diagnóstico rápido del explorador: unas pocas búsquedas sin tocar la base de datos.
+"""Diagnóstico rápido del explorador: unas pocas búsquedas sin tocar la base de datos,
+probando variantes de la petición a Google Flights.
 
     python diagnostico.py
 """
@@ -6,17 +7,43 @@
 import time
 from datetime import date, timedelta
 
+from fast_flights import FlightQuery, Passengers, create_query
+from fast_flights.parser import parse_js
+from primp import Client
+from selectolax.lexbor import LexborHTMLParser
+
 from agentes import vuelos
 
-PRUEBAS = [("escapada", "FCO", 47), ("escapada", "DUB", 32), ("escapada", "SVQ", 39), ("granviaje", "BKK", 261)]
+PRUEBAS = [("FCO", 47, 3), ("DUB", 32, 3), ("SVQ", 39, 3), ("BKK", 261, 15)]
 
-cliente = vuelos._cliente()
-for perfil, destino, dias in PRUEBAS:
-    ida = date.today() + timedelta(days=dias)
-    noches = 15 if perfil == "granviaje" else 3
-    r = vuelos.buscar(cliente, destino, ida, ida + timedelta(days=noches), 2)
-    if r:
-        print(f"OK  {destino} {ida}: {r['precio_persona']} € (típico {r.get('google_tipico')}, rango {r.get('google_rango')})")
-    else:
-        print(f"MAL {destino} {ida}: {vuelos.buscar.ultimo_motivo}")
-    time.sleep(3)
+VARIANTES = {
+    "google.com": dict(url="https://www.google.com/travel/flights", headers={}),
+    "google.es + es-ES": dict(
+        url="https://www.google.es/travel/flights",
+        headers={"Accept-Language": "es-ES,es;q=0.9"},
+    ),
+}
+
+
+def probar(nombre, url, headers):
+    cliente = Client(impersonate="chrome_145", impersonate_os="windows", referer=True, cookie_store=True)
+    print(f"--- {nombre}")
+    for destino, dias, noches in PRUEBAS:
+        ida = date.today() + timedelta(days=dias)
+        q = create_query(
+            flights=[FlightQuery(date=ida.isoformat(), from_airport="MAD", to_airport=destino),
+                     FlightQuery(date=(ida + timedelta(days=noches)).isoformat(), from_airport=destino, to_airport="MAD")],
+            trip="round-trip", passengers=Passengers(adults=1), language="es", currency="EUR", max_stops=2,
+        )
+        res = cliente.get(url, params={**q.params(), "gl": "es"}, headers=headers, cookies=vuelos.COOKIES)
+        try:
+            js = LexborHTMLParser(res.text).css_first(r"script.ds\:1").text()
+            precios = sorted(v.price for v in parse_js(js) if v.price)
+            print(f"OK  {destino} {ida}: {precios[0]} € ({len(precios)} vuelos)")
+        except Exception:
+            print(f"MAL {destino} {ida}: {vuelos.motivo_fallo(res)}")
+        time.sleep(3)
+
+
+for nombre, v in VARIANTES.items():
+    probar(nombre, **v)
