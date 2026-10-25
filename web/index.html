@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chollos de Viaje</title>
+<meta name="description" content="Ofertas de vuelos desde Madrid puntuadas de 0 a 100. Solo las que de verdad merecen la pena.">
+<meta property="og:title" content="Chollos de viaje desde Madrid">
+<meta property="og:description" content="Ofertas de vuelos puntuadas de 0 a 100. Solo las que de verdad merecen la pena.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>">
+<style>
+  :root {
+    --bg: #f6f4ef; --card: #ffffff; --text: #1d1f23; --muted: #6b6f76; --line: #e6e2d9; --soft: #f0ede6;
+    --excelente: #2b8a3e; --muy_bueno: #5c940d; --bueno: #82a10d; --normal: #868e96; --caro: #e03131;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141518; --card: #1e2024; --text: #eceef1; --muted: #9a9fa8; --line: #2d3036; --soft: #26292e;
+      --excelente: #51cf66; --muy_bueno: #94d82d; --bueno: #c0d84a; --normal: #adb5bd; --caro: #ff6b6b;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 4px; }
+  h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.3rem); letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin-top: 4px; font-size: .95rem; }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: .85rem; color: var(--muted); }
+  .stats b { color: var(--text); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+  nav { display: flex; gap: 8px; overflow-x: auto; padding: 18px 0 4px; scrollbar-width: none; }
+  nav button, .chip {
+    flex: none; border: 1px solid var(--line); background: var(--card); color: var(--text);
+    padding: 9px 16px; border-radius: 999px; font: inherit; font-size: .95rem; cursor: pointer;
+  }
+  nav button[aria-selected="true"], .chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 0 16px; }
+  .chip { padding: 6px 12px; font-size: .85rem; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; }
+  .card.cerrada { opacity: .78; }
+  .top { display: flex; gap: 14px; align-items: flex-start; }
+  .score { flex: none; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; position: relative; }
+  .score svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .score b { font-size: 1.15rem; }
+  .info { flex: 1; min-width: 0; }
+  .city { font-size: 1.2rem; font-weight: 650; line-height: 1.2; }
+  .dates { color: var(--muted); font-size: .88rem; margin-top: 2px; }
+  .val { display: inline-block; margin-top: 6px; font-size: .78rem; font-weight: 650; padding: 2px 8px; border-radius: 6px; color: #fff; }
+  @media (prefers-color-scheme: dark) { .val { color: #111; } }
+  .price { text-align: right; white-space: nowrap; }
+  .price b { font-size: 1.5rem; letter-spacing: -.02em; }
+  .price small { display: block; color: var(--muted); font-size: .76rem; }
+  .bar { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--excelente), var(--bueno) 35%, var(--normal) 60%, var(--caro)); }
+  .bar i { position: absolute; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: var(--text); transform: translateX(-50%); }
+  .barlbl { display: flex; justify-content: space-between; font-size: .72rem; color: var(--muted); margin-top: 4px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: .8rem; }
+  .tag { background: var(--soft); border-radius: 6px; padding: 3px 8px; color: var(--muted); }
+  .tag.up { color: var(--caro); } .tag.down { color: var(--excelente); font-weight: 600; }
+  details { font-size: .82rem; color: var(--muted); }
+  details summary { cursor: pointer; }
+  details table { width: 100%; margin-top: 6px; border-collapse: collapse; }
+  details td { padding: 2px 0; } details td:last-child { text-align: right; color: var(--text); }
+  .spark { width: 100%; height: 34px; }
+  .card a.btn { margin-top: auto; text-align: center; text-decoration: none; font-weight: 600; font-size: .92rem; padding: 10px; border-radius: 10px; background: var(--text); color: var(--bg); }
+  .card a.btn:hover { opacity: .88; }
+  .resumen { color: var(--muted); font-size: .88rem; margin: 0; }
+  .empty { color: var(--muted); padding: 40px 0; text-align: center; grid-column: 1 / -1; }
+  .how { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; font-size: .9rem; color: var(--muted); margin-top: 28px; }
+  .how h2 { font-size: 1rem; color: var(--text); margin: 0 0 8px; }
+  .how ul { margin: 6px 0; padding-left: 18px; }
+  footer { color: var(--muted); font-size: .8rem; margin-top: 24px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>✈️ Chollos de viaje desde Madrid</h1>
+    <div class="sub" id="sub"></div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <nav role="tablist" id="tabs"></nav>
+  <div class="chips" id="chips"></div>
+  <main class="grid" id="lista"></main>
+
+  <section class="how">
+    <h2>¿Cómo se puntúa?</h2>
+    Cada día un equipo de agentes busca vuelos desde Madrid y compara cada precio con lo que suele costar esa misma ruta en esas fechas, según los datos de Google Flights.
+    La puntuación (0-100) suma:
+    <ul>
+      <li><b>Descuento</b> (hasta 45): cuánto más barato es que el precio típico.</li>
+      <li><b>Rango</b> (hasta 30): si está por debajo del rango de precios habitual.</li>
+      <li><b>Mínimo de 60 días</b> (hasta 15): si es el precio más bajo de los últimos dos meses.</li>
+      <li><b>Vuelo</b> (hasta 10): directo o con pocas escalas.</li>
+    </ul>
+    Solo entran las ofertas con <b>65 o más</b>. Se revisan a diario: si suben de precio o desaparecen, pasan al histórico. Solo se notifican las de <b id="umbral">80</b> o más, una vez confirmadas.
+  </section>
+
+  <footer>
+    Precios por persona, ida y vuelta en clase turista, tal y como aparecían en la última revisión. Las aerolíneas de bajo coste cobran aparte la maleta grande.
+    Los precios cambian en cualquier momento: comprueba siempre antes de reservar. El total del grupo es una estimación.
+  </footer>
+</div>
+
+<script src="datos.js"></script>
+<script>
+const D = window.DATOS || { activas: [], historico: [], ofertas_web: [], perfiles: {}, valoraciones: [], estadisticas: {}, personas: 4 };
+const $ = id => document.getElementById(id);
+const eur = n => Math.round(n).toLocaleString("es-ES") + " €";
+const fecha = iso => new Date(iso.slice(0, 10) + "T12:00").toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" });
+const fechaCorta = iso => new Date(iso.slice(0, 10) + "T12:00").toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+const horas = m => `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")}`;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const dias = iso => Math.max(0, Math.round((Date.now() - new Date(iso)) / 864e5));
+const TEXTO_VAL = Object.fromEntries(D.valoraciones.map(([, k, t]) => [k, t]));
+const color = k => `var(--${k})`;
+
+const TABS = [["activas", "🔥 Ofertas activas"], ["historico", "🗂️ Histórico"], ["web", "📰 Webs de ofertas"]];
+const FILTROS = [["todas", "Todas"], ...Object.entries(D.perfiles).map(([k, p]) => [k, p.nombre])];
+let tab = "activas", filtro = "todas";
+try { tab = localStorage.getItem("tab") || tab; filtro = localStorage.getItem("filtro") || filtro; } catch (e) {}
+if (!TABS.some(t => t[0] === tab)) tab = "activas";
+if (!FILTROS.some(f => f[0] === filtro)) filtro = "todas";
+
+$("umbral").textContent = D.umbral_aviso || 80;
+$("sub").textContent = D.actualizado
+  ? `Última revisión: ${new Date(D.actualizado).toLocaleString("es-ES", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}`
+  : "Todavía no hay datos";
+const E = D.estadisticas;
+const estadoColor = { ok: "var(--excelente)", degradado: "var(--bueno)", fallo: "var(--caro)" }[E.estado_sistema] || "var(--normal)";
+const estadoTxt = { ok: "Sistema funcionando", degradado: "Sistema con incidencias", fallo: "Sistema caído" }[E.estado_sistema] || "Sin datos";
+$("stats").innerHTML = `
+  <span><b>${D.activas.length}</b> ofertas activas</span>
+  <span><b>${(E.precios_analizados || 0).toLocaleString("es-ES")}</b> precios analizados</span>
+  <span><b>${E.ofertas_totales || 0}</b> ofertas detectadas en total</span>
+  <span><i class="dot" style="background:${estadoColor}"></i>${estadoTxt}</span>`;
+
+$("tabs").innerHTML = TABS.map(([k, t]) => `<button role="tab" data-k="${k}">${t}</button>`).join("");
+$("chips").innerHTML = FILTROS.map(([k, t]) => `<button class="chip" data-k="${k}">${esc(t)}</button>`).join("");
+$("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { tab = b.dataset.k; guardar(); render(); } });
+$("chips").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { filtro = b.dataset.k; guardar(); render(); } });
+function guardar() { try { localStorage.setItem("tab", tab); localStorage.setItem("filtro", filtro); } catch (e) {} }
+
+function anillo(p, k) {
+  const r = 26, c = 2 * Math.PI * r;
+  return `<div class="score"><svg viewBox="0 0 58 58"><circle cx="29" cy="29" r="${r}" fill="none" stroke="var(--soft)" stroke-width="5"/>
+    <circle cx="29" cy="29" r="${r}" fill="none" stroke="${color(k)}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c * p / 100} ${c}"/></svg><b>${p}</b></div>`;
+}
+
+function barraRango(o) {
+  // posición del precio actual entre el mínimo del gráfico y el máximo del rango habitual
+  const min = Math.min(o.precio_actual, o.rango_bajo) * 0.85, max = o.rango_alto * 1.05;
+  const pos = Math.min(100, Math.max(0, (o.precio_actual - min) / (max - min) * 100));
+  return `<div><div class="bar"><i style="left:${pos}%"></i></div>
+    <div class="barlbl"><span>Barato</span><span>Habitual ${eur(o.rango_bajo)}–${eur(o.rango_alto)}</span><span>Caro</span></div></div>`;
+}
+
+function grafica(ev) {
+  if (ev.length < 2) return "";
+  const ps = ev.map(e => e[1]), lo = Math.min(...ps), hi = Math.max(...ps), w = 300, h = 34;
+  const pts = ps.map((p, i) => `${(i / (ps.length - 1)) * w},${hi === lo ? h / 2 : h - 3 - (p - lo) / (hi - lo) * (h - 6)}`).join(" ");
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="var(--muted)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
+}
+
+function tarjeta(o, cerrada) {
+  const tags = [];
+  if (!cerrada && o.precio_actual < o.precio_inicial) tags.push(`<span class="tag down">↓ ${eur(o.precio_inicial - o.precio_actual)} desde que se detectó</span>`);
+  if (!cerrada && o.precio_actual > o.precio_inicial) tags.push(`<span class="tag up">↑ ${eur(o.precio_actual - o.precio_inicial)} desde que se detectó</span>`);
+  tags.push(`<span class="tag">${o.escalas ? o.escalas + (o.escalas > 1 ? " escalas" : " escala") : "Directo"}</span>`);
+  if (o.minutos_vuelo) tags.push(`<span class="tag">${horas(o.minutos_vuelo)} (ida)</span>`);
+  tags.push(`<span class="tag">${esc((o.aerolineas || []).join(", "))}</span>`);
+  if (o.hora_salida) tags.push(`<span class="tag">Sale ${o.hora_salida}</span>`);
+
+  const g = o.desglose || {};
+  const vida = cerrada
+    ? `Activa del ${fechaCorta(o.descubierta)} al ${fechaCorta(o.cerrada)} · ${esc(o.motivo_cierre)} · mejor precio ${eur(o.precio_minimo)}`
+    : `Detectada hace ${dias(o.descubierta)} días · revisada ${o.verificaciones} ${o.verificaciones === 1 ? "vez" : "veces"}`;
+  return `<article class="card ${cerrada ? "cerrada" : ""}">
+    <div class="top">
+      ${anillo(o.puntuacion, o.valoracion)}
+      <div class="info">
+        <div class="city">${esc(o.ciudad)}</div>
+        <div class="dates">${fecha(o.ida)} → ${fecha(o.vuelta)}</div>
+        <span class="val" style="background:${color(o.valoracion)}">${TEXTO_VAL[o.valoracion] || ""}</span>
+      </div>
+      <div class="price"><b>${eur(o.precio_actual)}</b><small>por persona</small><small>${D.personas} pers. ≈ ${eur(o.precio_actual * D.personas)}</small></div>
+    </div>
+    ${barraRango(o)}
+    <div class="meta">${tags.join("")}</div>
+    ${grafica(o.evolucion || [])}
+    <details><summary>${vida}</summary>
+      <table>
+        <tr><td>Descuento sobre el típico (${eur(o.tipico)})</td><td>${g.descuento ?? "–"} / 45</td></tr>
+        <tr><td>Posición en el rango habitual</td><td>${g.rango ?? "–"} / 30</td></tr>
+        <tr><td>Mínimo de 60 días${o.min60 ? ` (${eur(o.min60)})` : ""}</td><td>${g.minimo_60d ?? "–"} / 15</td></tr>
+        <tr><td>Calidad del vuelo</td><td>${g.vuelo ?? "–"} / 10</td></tr>
+        <tr><td>Precio al detectarla / mínimo visto</td><td>${eur(o.precio_inicial)} / ${eur(o.precio_minimo)}</td></tr>
+      </table>
+    </details>
+    ${cerrada ? "" : `<a class="btn" href="${esc(o.enlace)}" target="_blank" rel="noopener">Ver vuelos</a>`}
+  </article>`;
+}
+
+function tarjetaWeb(o) {
+  return `<article class="card">
+    <div class="top"><div class="info"><div class="city" style="font-size:1.05rem">${esc(o.titulo)}</div><div class="dates">${esc(o.fuente)}${o.fecha ? " · " + fechaCorta(o.fecha) : ""}</div></div>
+      ${o.precio ? `<div class="price"><b>${eur(o.precio)}</b><small>desde</small></div>` : ""}</div>
+    ${o.resumen ? `<p class="resumen">${esc(o.resumen.slice(0, 180))}${o.resumen.length > 180 ? "…" : ""}</p>` : ""}
+    <a class="btn" href="${esc(o.enlace)}" target="_blank" rel="noopener">Ver oferta</a>
+  </article>`;
+}
+
+function render() {
+  for (const b of $("tabs").children) b.setAttribute("aria-selected", b.dataset.k === tab);
+  for (const b of $("chips").children) b.setAttribute("aria-pressed", b.dataset.k === filtro);
+  $("chips").style.display = tab === "web" ? "none" : "";
+  const porPerfil = xs => xs.filter(o => filtro === "todas" || o.perfil === filtro);
+  let html, vacio;
+  if (tab === "web") {
+    html = D.ofertas_web.map(tarjetaWeb).join("");
+    vacio = "No hay ofertas recientes en las webs.";
+  } else if (tab === "historico") {
+    html = porPerfil(D.historico).map(o => tarjeta(o, true)).join("");
+    vacio = "El histórico se irá llenando a medida que caduquen ofertas.";
+  } else {
+    html = porPerfil(D.activas).map(o => tarjeta(o, false)).join("");
+    vacio = "Ahora mismo no hay ofertas que merezcan la pena. Los agentes siguen buscando cada día.";
+  }
+  $("lista").innerHTML = html || `<div class="empty">${vacio}</div>`;
+}
+render();
+</script>
+</body>
+</html>

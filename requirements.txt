@@ -1,0 +1,7 @@
+fast-flights==3.1.0
+primp==2.0.1
+selectolax==1.0.2
+protobuf==7.36.2
+typing_extensions==4.16.0
+feedparser==6.0.14
+tzdata==2026.5
