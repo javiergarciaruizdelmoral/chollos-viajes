@@ -47,3 +47,16 @@ def probar(nombre, url, headers):
 
 for nombre, v in VARIANTES.items():
     probar(nombre, **v)
+
+print("--- Ryanair")
+from fuentes.ryanair import Ryanair  # noqa: E402
+
+ry = Ryanair("MAD")
+hoy = date.today()
+try:
+    tarifas = ry.tarifas(hoy + timedelta(days=30), hoy + timedelta(days=50), (3, 4), [3, 4])
+    print(f"{'OK ' if tarifas else 'MAL'} {len(tarifas)} tarifas, {ry.consultas} consultas, {ry.errores} errores")
+    for t in sorted(tarifas, key=lambda t: t["precio_persona"])[:5]:
+        print(f"    {t['ciudad']} {t['ida']}: {t['precio_persona']} €")
+except Exception as e:
+    print(f"MAL Ryanair: {e}")
