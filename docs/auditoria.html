@@ -1,0 +1,373 @@
+<title>Auditoría Chollos de Viaje</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  /* Layout: informe de una columna (~70ch) con tablas a ancho completo; las secciones se anclan como un "plan de vuelo" */
+  :root {
+    --bg: #f6f8fa;
+    --paper: #ffffff;
+    --ink: #142033;
+    --muted: #5b6878;
+    --line: #dde3ea;
+    --accent: #0b7285;
+    --accent-soft: #e3f3f5;
+    --ok: #2f7d32; --ok-soft: #e7f4e8;
+    --warn: #a86400; --warn-soft: #fbf0dc;
+    --crit: #b42318; --crit-soft: #fbe7e5;
+    --f-display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+    --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+    --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f151d; --paper: #161e28; --ink: #e6ecf2; --muted: #9aa8b8; --line: #283442;
+      --accent: #4fc3d4; --accent-soft: #12303a;
+      --ok: #6cc070; --ok-soft: #15301a; --warn: #f0b04a; --warn-soft: #3a2a10; --crit: #ff7a6b; --crit-soft: #3d1714;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f151d; --paper: #161e28; --ink: #e6ecf2; --muted: #9aa8b8; --line: #283442;
+    --accent: #4fc3d4; --accent-soft: #12303a;
+    --ok: #6cc070; --ok-soft: #15301a; --warn: #f0b04a; --warn-soft: #3a2a10; --crit: #ff7a6b; --crit-soft: #3d1714;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.6 var(--f-body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 64px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .prose { max-width: 70ch; }
+  h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.15; letter-spacing: -.01em; }
+  h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 800; margin: 0; }
+  h2 { font-size: 1.55rem; font-weight: 700; margin: 0 0 14px; }
+  h3 { font-size: 1.12rem; font-weight: 700; margin: 22px 0 8px; }
+  p { margin: 0 0 12px; }
+  a { color: var(--accent); }
+  .mono, code { font-family: var(--f-mono); font-size: .86em; }
+  .eyebrow { font: 700 .74rem/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+
+  header.hero { padding-block: 44px 28px; border-bottom: 1px solid var(--line); margin-bottom: 8px; display: grid; gap: 14px; }
+  .route { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-family: var(--f-mono); font-weight: 700; color: var(--muted); font-size: .9rem; }
+  .route .iata { color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; }
+  .lede { font-size: 1.15rem; color: var(--muted); max-width: 62ch; margin: 0; }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; padding-block: 14px; font-size: .92rem; border-bottom: 1px solid var(--line); }
+  nav.toc a { color: var(--muted); text-decoration: none; }
+  nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent); text-decoration: underline; }
+
+  section { padding-block: 34px 6px; scroll-margin-top: 12px; }
+  section > .eyebrow { display: block; margin-bottom: 8px; }
+
+  .verdict { background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 18px 20px; display: grid; gap: 10px; }
+  .verdict p:last-child { margin: 0; }
+  .keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 16px; }
+  .key { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+  .key b { display: block; font-family: var(--f-display); font-size: 1.02rem; margin-bottom: 4px; }
+  .key span { color: var(--muted); font-size: .95rem; }
+
+  .tbl { overflow-x: auto; margin: 14px 0 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+  table { border-collapse: collapse; width: 100%; font-size: .94rem; min-width: 620px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font: 700 .74rem/1.3 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); white-space: nowrap; }
+
+  .pill { display: inline-block; font: 700 .72rem/1 var(--f-mono); letter-spacing: .04em; padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.crit { background: var(--crit-soft); color: var(--crit); }
+  .pill.info { background: var(--accent-soft); color: var(--accent); }
+
+  /* embudo de datos */
+  .funnel { display: grid; gap: 8px; margin: 18px 0 8px; }
+  .stage { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: center; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin-inline: calc(var(--i) * 4%); }
+  .stage b { font-family: var(--f-display); }
+  .stage .count { font: 700 1.05rem var(--f-mono); color: var(--accent); font-variant-numeric: tabular-nums; text-align: right; }
+  .stage small { grid-column: 1 / -1; color: var(--muted); font-size: .9rem; }
+  @media (max-width: 520px) { .stage { margin-inline: 0; } }
+
+  /* arquitectura por capas */
+  .layers { display: grid; gap: 6px; margin: 16px 0; }
+  .layer { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .layer .lname { font: 700 .78rem/1.3 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); padding-top: 2px; }
+  .layer .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: .88rem; border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; background: var(--bg); }
+  @media (max-width: 560px) { .layer { grid-template-columns: 1fr; gap: 6px; } }
+
+  .phases { display: grid; gap: 12px; margin-top: 14px; }
+  .phase { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; }
+  .phase .ph { font: 800 1.6rem/1 var(--f-display); color: var(--accent); }
+  .phase h3 { margin: 0 0 6px; }
+  .phase ul { margin: 6px 0 0; padding-left: 18px; }
+  .phase .exit { margin-top: 8px; font-size: .92rem; color: var(--muted); }
+  @media (max-width: 520px) { .phase { grid-template-columns: 1fr; gap: 4px; } }
+
+  ul.tight { padding-left: 20px; margin: 6px 0 12px; }
+  ul.tight li { margin-bottom: 4px; }
+  .decisions { counter-reset: d; list-style: none; padding: 0; display: grid; gap: 10px; }
+  .decisions li { counter-increment: d; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 14px 52px; position: relative; }
+  .decisions li::before { content: counter(d); position: absolute; left: 16px; top: 13px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--paper); font: 700 .85rem/24px var(--f-mono); text-align: center; }
+  .src { font-size: .88rem; color: var(--muted); }
+  .src li { margin-bottom: 4px; overflow-wrap: anywhere; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="route"><span class="iata">MAD</span> → <span>cualquier destino</span> · <span>auditoría técnica y plan de producto</span></div>
+    <h1>Chollos de Viaje: cómo convertir el prototipo en un producto profesional</h1>
+    <p class="lede">Revisión de lo construido hasta hoy, el problema de fondo que impide llevarlo a clientes y la arquitectura recomendada para hacerlo bien, con costes y fases.</p>
+    <div class="route" style="font-weight:500">Preparado para Javier · 25 de octubre de 2026</div>
+  </header>
+
+  <nav class="toc" aria-label="Contenido">
+    <a href="#veredicto">Veredicto</a><a href="#auditoria">Auditoría</a><a href="#datos">El problema de los datos</a>
+    <a href="#mercado">Referentes</a><a href="#fuentes">Fuentes de datos</a><a href="#arquitectura">Arquitectura</a>
+    <a href="#cliente">Requisitos de cliente</a><a href="#costes">Costes</a><a href="#fases">Fases</a><a href="#decisiones">Decisiones</a>
+  </nav>
+
+  <section id="veredicto">
+    <span class="eyebrow">Resumen</span>
+    <h2>Veredicto</h2>
+    <div class="verdict prose">
+      <p><strong>La lógica del producto es sólida; la forma de obtener los datos no lo es.</strong> El equipo de agentes, la puntuación de 0 a 100, el ciclo de vida de las ofertas y el vigilante funcionan y están probados. Pero todo depende de leer Google Flights de forma no autorizada, y eso tiene tres consecuencias: no puede ejecutarse en la nube (Google bloquea los centros de datos), puede romperse cualquier día y no es aceptable en un producto para clientes.</p>
+      <p><strong>Recomendación:</strong> conservar el motor de valoración y sustituir la capa de datos por fuentes con licencia, organizadas como un embudo: una fuente amplia y gratuita para descubrir candidatas y una fuente precisa, con pocas consultas, para validar solo las mejores. Con ese cambio todo corre en la nube, sin ordenadores encendidos, y sigue costando 0 € mientras sea un proyecto personal.</p>
+    </div>
+    <div class="keys">
+      <div class="key"><b>Qué se conserva</b><span>Tasador, archivero, verificador, vigilante, web, pruebas y GitHub.</span></div>
+      <div class="key"><b>Qué se rehace</b><span>El explorador: de leer Google Flights a consumir APIs.</span></div>
+      <div class="key"><b>Qué se añade</b><span>Analista con IA, base de datos en la nube, cuentas de usuario y avisos.</span></div>
+    </div>
+  </section>
+
+  <section id="auditoria">
+    <span class="eyebrow">Estado actual</span>
+    <h2>Auditoría del sistema</h2>
+    <p class="prose">Evaluación de cada pieza frente a lo que exigiría un producto con clientes.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Área</th><th>Situación actual</th><th>Valoración</th><th>Qué haría falta</th></tr></thead>
+      <tbody>
+        <tr><td>Fuente de precios</td><td>Lectura no oficial de Google Flights, una sola fuente.</td><td><span class="pill crit">Crítico</span></td><td>APIs con licencia y al menos dos fuentes.</td></tr>
+        <tr><td>Ejecución automática</td><td>Solo fiable desde una conexión doméstica; en GitHub, Google devuelve páginas vacías o precios de EE. UU.</td><td><span class="pill crit">Crítico</span></td><td>Se resuelve con el cambio de fuente.</td></tr>
+        <tr><td>Puntuación</td><td>Fórmula transparente de 0 a 100 sobre el precio típico, el rango habitual y el mínimo de 60 días.</td><td><span class="pill ok">Bien</span></td><td>Calibrarla con datos reales y añadir criterio cualitativo (IA).</td></tr>
+        <tr><td>Ciclo de vida</td><td>Alta, revisión diaria, caducidad, histórico y aviso único.</td><td><span class="pill ok">Bien</span></td><td>Se mantiene.</td></tr>
+        <tr><td>Vigilancia</td><td>Registra cada ejecución y detectó el fallo de GitHub antes de corromper datos.</td><td><span class="pill ok">Bien</span></td><td>Avisar de los fallos por un canal fiable.</td></tr>
+        <tr><td>Pruebas y código</td><td>10 pruebas automáticas, código versionado en GitHub, documentación.</td><td><span class="pill ok">Bien</span></td><td>Integración continua en cada cambio.</td></tr>
+        <tr><td>Base de datos</td><td>SQLite guardado dentro del repositorio.</td><td><span class="pill warn">Mejorable</span></td><td>Base de datos en la nube (Postgres) para varios usuarios.</td></tr>
+        <tr><td>Web</td><td>Página estática; todos ven lo mismo; aún no publicada.</td><td><span class="pill warn">Mejorable</span></td><td>Aplicación web con cuentas, preferencias y app instalable.</td></tr>
+        <tr><td>Precio por persona</td><td>Se busca para 1 adulto y se multiplica por 4.</td><td><span class="pill warn">Mejorable</span></td><td>Validar el precio real para el grupo antes de avisar.</td></tr>
+        <tr><td>Equipaje</td><td>Las tarifas de bajo coste no incluyen maleta.</td><td><span class="pill warn">Mejorable</span></td><td>Mostrar el precio con equipaje o avisarlo claramente.</td></tr>
+        <tr><td>Alojamiento</td><td>No existe.</td><td><span class="pill info">Pendiente</span></td><td>Paquetes de webs especializadas y API de hoteles.</td></tr>
+        <tr><td>Notificaciones</td><td>Código listo; CallMeBot no funcionó.</td><td><span class="pill info">Pendiente</span></td><td>Telegram y email; WhatsApp oficial si hay clientes.</td></tr>
+        <tr><td>Aspectos legales</td><td>Sin política de privacidad ni aviso legal.</td><td><span class="pill info">Pendiente</span></td><td>Obligatorio antes de tener usuarios externos.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="datos">
+    <span class="eyebrow">Causa raíz</span>
+    <h2>El problema de los datos</h2>
+    <div class="prose">
+      <p>El 25 de octubre se lanzaron las mismas cuatro búsquedas desde el ordenador de casa y desde los servidores de GitHub. El resultado explica por qué el prototipo no puede ir a la nube tal y como está:</p>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Búsqueda</th><th>Desde casa</th><th>GitHub · google.com</th><th>GitHub · google.es</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">MAD–FCO</span> Roma, 11-14 dic</td><td class="num">72 €</td><td><span class="pill crit">sin datos</span></td><td class="num">72 €</td></tr>
+        <tr><td><span class="mono">MAD–DUB</span> Dublín, 26-29 nov</td><td class="num">67 €</td><td><span class="pill crit">sin datos</span></td><td><span class="pill crit">sin datos</span></td></tr>
+        <tr><td><span class="mono">MAD–SVQ</span> Sevilla, 3-6 dic</td><td class="num">81 €</td><td class="num">251 €</td><td><span class="pill crit">sin datos</span></td></tr>
+        <tr><td><span class="mono">MAD–BKK</span> Bangkok, julio 2027</td><td class="num">712 €</td><td><span class="pill crit">sin datos</span></td><td><span class="pill crit">sin datos</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="prose">
+      <p>Google reconoce los centros de datos y les sirve respuestas incompletas. Además, la lectura automática de Google Flights no está permitida por sus condiciones de uso. Para uso personal y moderado el riesgo es bajo, pero un producto para clientes no puede apoyarse en ello: si Google cambia su web o bloquea el acceso, el producto deja de funcionar sin previo aviso.</p>
+      <p>Por eso la decisión importante no es dónde ejecutar el programa, sino <strong>de dónde salen los precios</strong>.</p>
+    </div>
+  </section>
+
+  <section id="mercado">
+    <span class="eyebrow">Mercado</span>
+    <h2>Referentes</h2>
+    <p class="prose">El modelo que buscas ya existe y funciona en el mercado. Estos son los referentes y lo que se puede aprender de cada uno.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Servicio</th><th>Cómo funciona</th><th>Cómo gana dinero</th><th>Lección</th></tr></thead>
+      <tbody>
+        <tr><td>Going (antes Scott's Cheap Flights)</td><td>Detecta tarifas anómalas y avisa por email; solo vuelos.</td><td>Suscripción freemium.</td><td>Pocos avisos, muy filtrados: la confianza es el producto.</td></tr>
+        <tr><td>Jack's Flight Club</td><td>Igual que Going, centrado en Europa.</td><td>Suscripción freemium.</td><td>Segmentar por aeropuerto de salida.</td></tr>
+        <tr><td>Viajeros Piratas</td><td>Equipo editorial que publica vuelos, hoteles y paquetes.</td><td>Afiliación (comisión por reserva).</td><td>Los paquetes de vuelo + hotel atraen al gran público.</td></tr>
+        <tr><td>Secret Flying</td><td>Tarifas de error y chollos mundiales.</td><td>Publicidad y afiliación.</td><td>La rapidez del aviso es clave en las tarifas de error.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="prose">
+      <h3>Diferenciación posible</h3>
+      <ul class="tight">
+        <li><strong>Puntuación transparente:</strong> cada oferta explica por qué es buena (descuento, rango, mínimo histórico).</li>
+        <li><strong>Pensado para grupos:</strong> precio por persona y para el grupo, con perfiles como "escapada con padres" o "gran viaje con amigos".</li>
+        <li><strong>Ofertas vivas:</strong> se revisan cada día y se retiran cuando dejan de serlo; los demás publican y olvidan.</li>
+        <li><strong>Avisos por mensajería</strong> además de email.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="fuentes">
+    <span class="eyebrow">Proveedores</span>
+    <h2>Fuentes de datos profesionales</h2>
+    <p class="prose">Estado a octubre de 2026. Las condiciones de los proveedores cambian; confirmar en su documentación antes de construir sobre ellas.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Fuente</th><th>Qué da</th><th>Coste</th><th>Encaje</th></tr></thead>
+      <tbody>
+        <tr><td>Travelpayouts (Aviasales) · Data API</td><td>Precios más baratos encontrados por usuarios en las últimas 48 h, por ruta y fecha.</td><td>Gratis al registrarse como afiliado; además paga comisión por reserva.</td><td><span class="pill ok">Descubrimiento</span> Amplio y barato, pero los datos son de caché y hay que validarlos.</td></tr>
+        <tr><td>Ryanair (vía pública no oficial)</td><td>Tarifas más baratas desde Madrid a todos sus destinos.</td><td>Gratis.</td><td><span class="pill warn">Complemento</span> Útil para descubrir; sin garantía de continuidad.</td></tr>
+        <tr><td>SerpApi · Google Flights</td><td>Resultados de Google Flights con licencia, incluida la valoración de precios de Google.</td><td>Plan gratuito de 100-250 búsquedas/mes; 25 $/mes por 1.000.</td><td><span class="pill ok">Validación</span> Precisa y legal; se reserva para las candidatas.</td></tr>
+        <tr><td>Ignav</td><td>Búsqueda de tarifas ida y vuelta por API.</td><td>1.000 consultas gratis; luego 2 $ por cada 1.000.</td><td><span class="pill info">Alternativa</span> Para validar o como segunda fuente.</td></tr>
+        <tr><td>Duffel (vuelos y Stays)</td><td>Búsqueda y reserva de vuelos y más de un millón de alojamientos.</td><td>Cobra por reserva; la búsqueda solo se cobra si se busca mucho sin reservar.</td><td><span class="pill info">Futuro</span> Si algún día se quiere vender dentro de la web.</td></tr>
+        <tr><td>Amadeus Self-Service</td><td>Antigua API gratuita de vuelos y hoteles.</td><td>Cerrada desde julio de 2026.</td><td><span class="pill crit">Descartada</span></td></tr>
+        <tr><td>Skyscanner, Kiwi</td><td>APIs de búsqueda.</td><td>Solo para socios aprobados con tráfico.</td><td><span class="pill crit">No accesible</span> por ahora.</td></tr>
+        <tr><td>Webs de chollos (RSS)</td><td>Paquetes de vuelo + hotel publicados por editores.</td><td>Gratis.</td><td><span class="pill ok">Paquetes</span> La IA extrae destino, noches y precio para puntuarlos.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="arquitectura">
+    <span class="eyebrow">Diseño objetivo</span>
+    <h2>Arquitectura recomendada</h2>
+    <div class="prose">
+      <h3>El embudo: cómo encaja todo en los planes gratuitos</h3>
+      <p>La idea central es no gastar consultas caras en precios normales. Cada etapa filtra a la siguiente:</p>
+    </div>
+    <div class="funnel" aria-label="Embudo de datos diario (cifras orientativas)">
+      <div class="stage" style="--i:0"><b>Descubrimiento</b><span class="count">~2.000</span><small>Combinaciones ruta-fecha al día desde Travelpayouts y Ryanair. Gratis y sin límites prácticos.</small></div>
+      <div class="stage" style="--i:1"><b>Preselección</b><span class="count">~20</span><small>El tasador descarta lo que no está claramente por debajo de lo habitual para esa ruta.</small></div>
+      <div class="stage" style="--i:2"><b>Validación</b><span class="count">~5-8</span><small>SerpApi confirma el precio real en Google Flights, con su rango habitual. Encaja en el plan gratuito.</small></div>
+      <div class="stage" style="--i:3"><b>Criterio (IA)</b><span class="count">~2-4</span><small>El analista revisa horarios, escalas, festivos y equipaje, y redacta el porqué.</small></div>
+      <div class="stage" style="--i:4"><b>Aviso</b><span class="count">1-3/semana</span><small>Solo lo excelente y confirmado, una única vez.</small></div>
+    </div>
+
+    <h3>Capas del sistema</h3>
+    <div class="layers">
+      <div class="layer"><div class="lname">Fuentes</div><div class="chips"><span class="chip">Travelpayouts</span><span class="chip">Ryanair</span><span class="chip">SerpApi</span><span class="chip">RSS de chollos</span></div></div>
+      <div class="layer"><div class="lname">Ingesta</div><div class="chips"><span class="chip">Un adaptador por fuente</span><span class="chip">Formato común</span><span class="chip">Reintentos y límites</span></div></div>
+      <div class="layer"><div class="lname">Valoración</div><div class="chips"><span class="chip">Tasador 0-100</span><span class="chip">Verificador</span><span class="chip">Analista IA</span></div></div>
+      <div class="layer"><div class="lname">Catálogo</div><div class="chips"><span class="chip">Postgres (Supabase)</span><span class="chip">Ofertas y ciclo de vida</span><span class="chip">Histórico de precios</span></div></div>
+      <div class="layer"><div class="lname">Producto</div><div class="chips"><span class="chip">Web app (Cloudflare Pages)</span><span class="chip">Cuentas y preferencias</span><span class="chip">App instalable</span><span class="chip">Telegram y email</span></div></div>
+      <div class="layer"><div class="lname">Operación</div><div class="chips"><span class="chip">GitHub Actions (5:00)</span><span class="chip">Vigilante y alertas</span><span class="chip">Pruebas automáticas</span></div></div>
+    </div>
+    <p class="prose">Al usar APIs, la ejecución en GitHub deja de tener el problema de los centros de datos: <strong>todo corre en la nube y no hace falta ningún ordenador encendido</strong>.</p>
+  </section>
+
+  <section id="cliente">
+    <span class="eyebrow">Si va a clientes</span>
+    <h2>Requisitos de un producto para clientes</h2>
+    <div class="prose">
+      <h3>Legal (España y UE)</h3>
+      <ul class="tight">
+        <li><strong>RGPD:</strong> política de privacidad, consentimiento explícito para emails y avisos, y derecho a darse de baja.</li>
+        <li><strong>LSSI:</strong> aviso legal con los datos del titular si la web tiene actividad económica (afiliación incluida).</li>
+        <li><strong>Cookies:</strong> banner de consentimiento si se usan cookies de análisis o afiliación.</li>
+        <li><strong>Transparencia:</strong> indicar que los enlaces son de afiliado y que los precios pueden cambiar.</li>
+        <li><strong>Condiciones de los proveedores:</strong> usar solo fuentes que permitan el uso comercial.</li>
+      </ul>
+      <h3>Producto</h3>
+      <ul class="tight">
+        <li>Cuentas de usuario con preferencias: aeropuerto de salida, tamaño del grupo, presupuesto y tipos de viaje.</li>
+        <li>Avisos personalizados según esas preferencias, no iguales para todos.</li>
+        <li>Ficha de cada oferta con la gráfica de precios y el desglose de la puntuación.</li>
+        <li>Marca y dominio propios, app instalable en el móvil y vista previa al compartir.</li>
+      </ul>
+      <h3>Operación</h3>
+      <ul class="tight">
+        <li>Alertas de fallo al responsable y página de estado del servicio.</li>
+        <li>Separar el entorno de pruebas del de producción.</li>
+        <li>Copias de seguridad de la base de datos.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="costes">
+    <span class="eyebrow">Presupuesto</span>
+    <h2>Costes</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Pieza</th><th>Herramienta</th><th>Uso personal</th><th>Producto con clientes</th></tr></thead>
+      <tbody>
+        <tr><td>Descubrimiento</td><td>Travelpayouts + Ryanair</td><td class="num">0 €</td><td class="num">0 € (genera comisiones)</td></tr>
+        <tr><td>Validación</td><td>SerpApi</td><td class="num">0 €</td><td class="num">~25-75 $/mes</td></tr>
+        <tr><td>IA analista</td><td>GitHub Models (Copilot) o Gemini</td><td class="num">0 €</td><td class="num">0-20 €/mes</td></tr>
+        <tr><td>Ejecución</td><td>GitHub Actions</td><td class="num">0 €</td><td class="num">0 €</td></tr>
+        <tr><td>Base de datos y cuentas</td><td>Supabase</td><td class="num">0 €</td><td class="num">0-25 $/mes</td></tr>
+        <tr><td>Web</td><td>Cloudflare Pages</td><td class="num">0 €</td><td class="num">0 €</td></tr>
+        <tr><td>Avisos</td><td>Telegram y email (Brevo o Resend)</td><td class="num">0 €</td><td class="num">0-15 €/mes</td></tr>
+        <tr><td>WhatsApp oficial</td><td>WhatsApp Business API</td><td class="num">—</td><td class="num">céntimos por mensaje</td></tr>
+        <tr><td>Dominio</td><td>Cualquier registrador</td><td class="num">opcional</td><td class="num">~10-15 €/año</td></tr>
+        <tr><td><strong>Total</strong></td><td></td><td class="num"><strong>0 €</strong></td><td class="num"><strong>~30-150 €/mes</strong></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="fases">
+    <span class="eyebrow">Plan</span>
+    <h2>Fases</h2>
+    <p class="prose">Cada fase termina con algo que funciona y que se puede usar. Las tres primeras mantienen el coste a cero.</p>
+    <div class="phases">
+      <div class="phase"><div class="ph">1</div><div>
+        <h3>Datos con licencia y nube</h3>
+        <ul><li>Adaptadores para Travelpayouts, Ryanair y SerpApi.</li><li>Embudo de descubrimiento y validación.</li><li>Ejecución diaria a las 5:00 en GitHub, sin ordenador encendido.</li></ul>
+        <p class="exit">Lista cuando: tres ejecuciones seguidas en la nube con precios que coinciden con los de Google Flights.</p>
+      </div></div>
+      <div class="phase"><div class="ph">2</div><div>
+        <h3>Web publicada y avisos</h3>
+        <ul><li>Web en Cloudflare Pages con enlace propio.</li><li>Bot y canal de Telegram, y email de respaldo.</li><li>Alertas de fallo del sistema.</li></ul>
+        <p class="exit">Lista cuando: tus amigos abren el enlace en el móvil y recibes el primer aviso real.</p>
+      </div></div>
+      <div class="phase"><div class="ph">3</div><div>
+        <h3>Analista con IA y paquetes</h3>
+        <ul><li>La IA revisa las candidatas y explica el porqué.</li><li>Sección "vuelo + hotel" a partir de las webs de chollos.</li><li>Ficha de oferta con gráfica de precios.</li></ul>
+        <p class="exit">Lista cuando: dos semanas de avisos sin falsos positivos.</p>
+      </div></div>
+      <div class="phase"><div class="ph">4</div><div>
+        <h3>Producto para usuarios</h3>
+        <ul><li>Cuentas, preferencias y avisos personalizados.</li><li>App instalable, marca y dominio.</li><li>Requisitos legales completos.</li></ul>
+        <p class="exit">Lista cuando: un usuario externo se registra, configura su grupo y recibe avisos adaptados.</p>
+      </div></div>
+      <div class="phase"><div class="ph">5</div><div>
+        <h3>Negocio</h3>
+        <ul><li>Enlaces de afiliado y medición de conversiones.</li><li>Plan premium con avisos antes que el resto.</li><li>Alojamiento por API (Duffel Stays o Booking).</li></ul>
+        <p class="exit">Lista cuando: los ingresos cubren los costes de operación.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <section id="decisiones">
+    <span class="eyebrow">Siguiente paso</span>
+    <h2>Decisiones que necesito de ti</h2>
+    <ol class="decisions prose">
+      <li><strong>Objetivo:</strong> ¿es un proyecto para ti y tus amigos, o quieres llevarlo a clientes? Cambia las fases 4 y 5, no las tres primeras.</li>
+      <li><strong>Cuentas gratuitas:</strong> registrarte en Travelpayouts y SerpApi para obtener sus claves. Te guío; son unos minutos cada una.</li>
+      <li><strong>Web:</strong> publicar en Cloudflare Pages manteniendo el código privado. Requiere una cuenta gratuita de Cloudflare.</li>
+      <li><strong>Avisos:</strong> Telegram como canal principal y email de respaldo.</li>
+    </ol>
+  </section>
+
+  <section id="fuentes-consultadas">
+    <span class="eyebrow">Referencias</span>
+    <h2>Fuentes consultadas</h2>
+    <ul class="src">
+      <li><a href="https://support.travelpayouts.com/hc/en-us/articles/206635207-What-is-the-API-and-what-is-it-for" target="_blank" rel="noopener">Travelpayouts: qué es la API de Aviasales y para qué sirve</a></li>
+      <li><a href="https://support.travelpayouts.com/hc/en-us/articles/20384016664594-Brands-that-provide-access-to-APIs-and-data-feeds-for-Travelpayouts-partners" target="_blank" rel="noopener">Travelpayouts: marcas con API para socios</a></li>
+      <li><a href="https://serpapi.com/pricing" target="_blank" rel="noopener">SerpApi: precios</a></li>
+      <li><a href="https://www.phocuswire.com/amadeus-shut-down-self-service-apis-portal-developers" target="_blank" rel="noopener">PhocusWire: Amadeus cierra el portal Self-Service</a></li>
+      <li><a href="https://ignav.com/docs/amadeus-self-service-shutdown" target="_blank" rel="noopener">Ignav: guía de migración desde Amadeus Self-Service</a></li>
+      <li><a href="https://duffel.com/docs/guides/getting-started-with-stays" target="_blank" rel="noopener">Duffel: introducción a Stays</a></li>
+      <li><a href="https://apis.io/plans/duffel/duffel-plans-pricing/" target="_blank" rel="noopener">apis.io: planes y precios de Duffel</a></li>
+    </ul>
+  </section>
+
+  <footer>Diagnóstico y cifras del 25 de octubre de 2026. Las cifras del embudo son orientativas y se ajustarán con datos reales en la fase 1.</footer>
+</div>

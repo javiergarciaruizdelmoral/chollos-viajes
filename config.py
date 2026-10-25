@@ -16,12 +16,13 @@ PAUSA_ENTRE_BUSQUEDAS = 3
 
 PERFILES = {
     "escapada": {
-        "nombre": "Escapada con padres",
-        "descripcion": "4 días por España y Europa",
-        "noches": 3,
-        # días de salida aceptados (0=lunes ... 6=domingo): jueves o viernes
-        "dias_salida": [3, 4],
-        "semanas_vista": 16,
+        "nombre": "Escapadas",
+        "descripcion": "3 a 5 noches, cualquier fecha del año",
+        "noches": 3,             # duración que prueba el explorador de Google (una sola por búsqueda)
+        "noches_rango": (3, 5),  # duraciones aceptadas por las fuentes que buscan por mes
+        # días de salida aceptados (0=lunes ... 6=domingo): cualquiera, las vacaciones se adaptan al chollo
+        "dias_salida": [0, 1, 2, 3, 4, 5, 6],
+        "semanas_vista": 48,
         "fechas_por_destino": 2,  # fechas distintas que se prueban por destino en cada ejecución
         "max_escalas": 1,
         # código: (ciudad, precio de referencia por persona ida y vuelta en €)
@@ -39,9 +40,10 @@ PERFILES = {
         },
     },
     "granviaje": {
-        "nombre": "Gran viaje con amigos",
-        "descripcion": "Sudeste asiático en verano",
+        "nombre": "Gran viaje de verano",
+        "descripcion": "Sudeste asiático en julio y agosto",
         "noches": 15,
+        "noches_rango": (12, 21),
         "largo_radio": True,  # el tasador penaliza menos las escalas
         "rango_salida": ("2027-07-01", "2027-08-31"),
         "fechas_por_destino": 2,
