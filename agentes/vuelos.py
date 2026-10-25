@@ -56,14 +56,17 @@ def buscar(cliente, destino, ida, vuelta, max_escalas):
         currency="EUR",
         max_stops=max_escalas,
     )
-    res = cliente.get(URL, params=q.params(), cookies=COOKIES)
+    # gl=es: buscar como desde España (si no, desde servidores de EE. UU. salen otras tarifas)
+    res = cliente.get(URL, params={**q.params(), "gl": "es"}, cookies=COOKIES)
     try:
         js = LexborHTMLParser(res.text).css_first(r"script.ds\:1").text()
         vuelos = [v for v in parse_js(js) if v.price]
     except (FlightsNotFound, AttributeError, TypeError, IndexError):
         # la página no traía resultados: bloqueo, página de cookies o fechas aún sin tarifas
+        buscar.ultimo_motivo = motivo_fallo(res)
         return None
     if not vuelos:
+        buscar.ultimo_motivo = "sin vuelos para esas fechas"
         return None
     mejor = min(vuelos, key=lambda v: v.price)
     tramos = mejor.flights
@@ -80,6 +83,22 @@ def buscar(cliente, destino, ida, vuelta, max_escalas):
         "enlace": q.url(),
         **valoracion_google(js),
     }
+
+
+def motivo_fallo(res):
+    """Describe por qué una respuesta de Google no traía vuelos, para el diagnóstico."""
+    titulo = LexborHTMLParser(res.text).css_first("title")
+    titulo = titulo.text() if titulo else ""
+    if res.status_code != 200:
+        return f"HTTP {res.status_code}"
+    if "unusual traffic" in res.text or "/sorry/" in str(res.url):
+        return "bloqueo de Google (captcha)"
+    if "consent" in str(res.url) or "Antes de continuar" in titulo:
+        return "página de cookies"
+    return f"página sin datos de vuelos ({titulo[:60]!r})"
+
+
+buscar.ultimo_motivo = None
 
 
 def valoracion_google(js):
@@ -144,5 +163,5 @@ def explorar(buscador, hoy=None, solo_perfil=None):
                     resultados.append(r)
                     buscador.log(f"  {ciudad} {r['ida']}: {r['precio_persona']} €")
                 else:
-                    buscador.log(f"  {ciudad} {ida}: sin resultados")
+                    buscador.log(f"  {ciudad} {ida}: sin resultados ({buscar.ultimo_motivo})")
     return resultados
